@@ -5,9 +5,8 @@ from django.db import models
 
 class Make(models.model):
     name = models.CharField(max_length=200)
-    description = models.TextField()
-    last_modified = models.DateTimeField()
-    location = models.URLField()
+    description = models.TextField(default='')
+    last_modified = models.DateTimeField(auto_now=True, auto_now_add=True)
 
 
 class Stat(models.model):
@@ -18,7 +17,6 @@ class Stat(models.model):
 class Model(models.model):
     name = models.CharField(max_length=200)
     years = models.CharField(max_length=64)
-    description = models.TextField()
+    description = models.TextField(default='')
     stats = models.ManyToManyField(Stat)
-    last_modified = models.DateTimeField()
-    location = models.URLField()
+    last_modified = models.DateTimeField(auto_now=True, auto_now_add=True)
