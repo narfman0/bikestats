@@ -16,6 +16,9 @@ class Scraper(object):
     @staticmethod
     def parse_model(soup):
         """ Parse a model of bike """
+        for strip_tag in ['script', 'style']:
+            for s in soup(strip_tag):
+                s.extract()
         parent_element = soup.select('table[cellspacing=1]')[0]
         # gather stats
         stats = []
@@ -25,13 +28,13 @@ class Scraper(object):
                 name = tds[0].text.strip()
                 value = tds[1].text.strip()
                 stats.append([name, value])
+                table_row.extract()
             except:
                 LOGGER.warning('Failed to parse table_row: ' + str(table_row))
         name = stats[0][1]
         # extract description
         description_element = parent_element.parent.parent.parent.parent.parent
-        parent_element.extract()
-        description = '' # TODO description_element.text.strip()
+        description = unicode(description_element).strip()
         return (name, description, stats)
 
     @staticmethod
@@ -49,19 +52,22 @@ class Scraper(object):
         Args:
             recursive: Boolean representing if each child page should also be parsed
         """
+        for strip_tag in ['script', 'style']:
+            for s in soup(strip_tag):
+                s.extract()
         # grab models from each page
         models = list(Scraper.parse_make_models(soup))
         if recursive:
             for page in Scraper.parse_make_pages(soup):
                 html = requests.get(ROOT_URL + page).text
                 models.extend(Scraper.parse_make_models(BeautifulSoup(html, 'html.parser')))
-        # TODO scrape make description
-        description = ''
+        # scrape make description
+        description = unicode(soup.select('div > table > tr div')[1]).replace('\r', '').replace('\t', '').strip()
         return (models, description)
 
     @staticmethod
     def parse_make_pages(soup):
-        # generate list of pages, e.g. 1, 2, 3, 4
+        """ Generate list of pages, e.g. 1, 2, 3, 4 """
         pages = []
         for anchor in soup.select('p > font > a'):
             href = anchor['href']
