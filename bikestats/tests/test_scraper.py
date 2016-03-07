@@ -24,7 +24,6 @@ class TestScraper(unittest.TestCase):
         with open(os.path.join(TEST_DIR, r'http:_www.motorcyclespecs.co.za_model_ducati_ducati_monster_1200s%2015.htm')) as f:
             soup = BeautifulSoup(f.read(), "html.parser")
             name, description, stats = Scraper.parse_model(soup)
-            import pdb; pdb.set_trace()
             self.assertEqual('Ducati Monster 1200S', name)
 
 

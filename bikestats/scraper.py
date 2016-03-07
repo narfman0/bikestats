@@ -56,7 +56,8 @@ class Scraper(object):
                 html = requests.get(ROOT_URL + page).text
                 models.extend(Scraper.parse_make_models(BeautifulSoup(html, 'html.parser')))
         # TODO scrape make description
-        return models
+        description = ''
+        return (models, description)
 
     @staticmethod
     def parse_make_pages(soup):
