@@ -1,13 +1,14 @@
 import os
-import unittest
 from bs4 import BeautifulSoup
+from django.test import TestCase
+
 from bikestats.scraper import Scraper
 
 
 TEST_DIR = os.path.abspath(os.path.dirname(__file__))
 
 
-class TestScraper(unittest.TestCase):
+class TestScraper(TestCase):
     def test_scrape_root(self):
         with open(os.path.join(TEST_DIR, r'http:_www.motorcyclespecs.co.za_.html')) as f:
             soup = BeautifulSoup(f.read(), "html.parser")

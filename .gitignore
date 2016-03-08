@@ -60,3 +60,5 @@ include/
 lib64
 
 www.motorcyclespecs.co.za
+tmp/
+bikestats/db.sqlite3
