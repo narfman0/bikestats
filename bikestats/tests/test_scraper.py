@@ -17,7 +17,7 @@ class TestScraper(unittest.TestCase):
     def test_scrape_make(self):
         with open(os.path.join(TEST_DIR, r'http:_www.motorcyclespecs.co.za_bikes_Ducati.htm')) as f:
             soup = BeautifulSoup(f.read(), "html.parser")
-            models, description = Scraper.parse_make(soup)
+            models, description, pages = Scraper.parse_make(soup)
             self.assertEqual(101, len(models))
 
     def test_scrape_model(self):

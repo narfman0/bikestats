@@ -57,13 +57,14 @@ class Scraper(object):
                 s.extract()
         # grab models from each page
         models = list(Scraper.parse_make_models(soup))
+        pages = Scraper.parse_make_pages(soup)
         if recursive:
-            for page in Scraper.parse_make_pages(soup):
+            for page in pages:
                 html = requests.get(ROOT_URL + page).text
                 models.extend(Scraper.parse_make_models(BeautifulSoup(html, 'html.parser')))
         # scrape make description
         description = unicode(soup.select('div > table > tr div')[1]).replace('\r', '').replace('\t', '').strip()
-        return (models, description)
+        return (models, description, pages)
 
     @staticmethod
     def parse_make_pages(soup):
