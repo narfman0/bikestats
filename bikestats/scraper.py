@@ -1,11 +1,8 @@
 import logging
 import re
-import requests
-from bs4 import BeautifulSoup
 
 
 LOGGER = logging.getLogger(__name__)
-ROOT_URL = 'http://www.motorcyclespecs.co.za/'
 
 
 class Scraper(object):
@@ -58,10 +55,6 @@ class Scraper(object):
         # grab models from each page
         models = list(Scraper.parse_make_models(soup))
         pages = Scraper.parse_make_pages(soup)
-        if recursive:
-            for page in pages:
-                html = requests.get(ROOT_URL + page).text
-                models.extend(Scraper.parse_make_models(BeautifulSoup(html, 'html.parser')))
         # scrape make description
         description = unicode(soup.select('div > table > tr div')[1]).replace('\r', '').replace('\t', '').strip()
         return (models, description, pages)

@@ -42,7 +42,11 @@ def parse_all():
     for name, make_href in Scraper.parse_makes(soup):
         make = Make.objects.get_or_create(name=name)
         make_soup = BeautifulSoup(requests.get(ROOT_URL + make_href).text, "html.parser")
-        models, description_make, pages = Scraper.parse_make(make_soup, True)
+        models, description_make, pages = Scraper.parse_make(make_soup)
+        for page in pages:
+            page_soup = BeautifulSoup(requests.get(ROOT_URL + page).text, "html.parser")
+            _models, _d, _p = Scraper.parse_make(page_soup)
+            models.extend(_models)
         for name_model, model_href, years in models:
             model = Model.get_or_create(name=name_model, make=make, years=years)
             model_soup = BeautifulSoup(requests.get(ROOT_URL + model_href).text, "html.parser")
