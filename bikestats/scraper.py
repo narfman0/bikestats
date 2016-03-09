@@ -1,8 +1,4 @@
-import logging
 import re
-
-
-LOGGER = logging.getLogger(__name__)
 
 
 class Scraper(object):
@@ -11,28 +7,33 @@ class Scraper(object):
     resources. We also don't want to peg the site too much, by being good webizens. """
 
     @staticmethod
-    def parse_model(soup):
+    def parse_model(soup, make_name='unknown make', model_name='unknown model'):
         """ Parse a model of bike """
         for strip_tag in ['script', 'style']:
             for s in soup(strip_tag):
                 s.extract()
-        parent_element = soup.select('table[cellspacing=1]')[0]
         # gather stats
         stats = []
-        for table_row in soup.select('table[cellspacing=1] tr'):
+        for i, table_row in enumerate(soup.select('table[cellspacing=1] tr')):
             try:
                 tds = table_row.select('td')
-                name = tds[0].text.strip()
+                model_name = tds[0].text.strip()
                 value = tds[1].text.strip()
-                stats.append([name, value])
+                stats.append([model_name, value])
                 table_row.extract()
             except:
-                LOGGER.warning('Failed to parse table_row: ' + str(table_row))
-        name = stats[0][1]
+                print 'Failed to parse table_row: ' + str(i) + ' for make/model: ' + make_name + '/' + model_name
+        if stats and stats[0]:
+            model_name = stats[0][1]
         # extract description
-        description_element = parent_element.parent.parent.parent.parent.parent
-        description = unicode(description_element).strip()
-        return (name, description, stats)
+        description = ''
+        try:
+            parent_element = soup.select('table[cellspacing=1]')[0]
+            description_element = parent_element.parent.parent.parent.parent.parent
+            description = unicode(description_element).strip()
+        except:
+            print 'Failed to parse description from make/model: ' + make_name + '/' + model_name
+        return (model_name, description, stats)
 
     @staticmethod
     def parse_makes(soup):
@@ -43,7 +44,7 @@ class Scraper(object):
             yield [make, href]
 
     @staticmethod
-    def parse_make(soup, recursive=False):
+    def parse_make(soup, recursive=False, name='unknown make'):
         """ Parse make (manufacturer) page
 
         Args:
@@ -53,10 +54,15 @@ class Scraper(object):
             for s in soup(strip_tag):
                 s.extract()
         # grab models from each page
-        models = list(Scraper.parse_make_models(soup))
+        models = list(Scraper.parse_make_models(soup, name))
         pages = Scraper.parse_make_pages(soup)
         # scrape make description
-        description = unicode(soup.select('div > table > tr div')[1]).replace('\r', '').replace('\t', '').strip()
+        description = ''
+        try:
+            soup_element = soup.select('div > table > tr div')
+            description = unicode(soup_element[1]).replace('\r', '').replace('\t', '').strip()
+        except:
+            print 'Failed to parse description for make: ' + name
         return (models, description, pages)
 
     @staticmethod
@@ -65,22 +71,23 @@ class Scraper(object):
         pages = []
         for anchor in soup.select('p > font > a'):
             href = anchor['href']
-            if 'model' not in href:
+            if 'model' not in href and 'http' not in href:
                 pages.append(href)
         return set(pages)
 
     @staticmethod
-    def parse_make_models(soup):
+    def parse_make_models(soup, make_name='unknown make'):
         """ Parse all the make's models on a given page. """
-        for model_row in soup.select('div > table > tr div > table > tr'):
+        for i, model_row in enumerate(soup.select('div > table > tr div > table > tr')):
             try:
                 anchor = model_row.select('a')[0]
-                name = anchor.text.strip().replace("\n","").replace("\r","").replace("\t","")
+                name = anchor.text.replace("\n","").replace("\r","").replace("\t","").strip()
                 href = anchor['href']
                 # check if model has date information in another td
                 years = -1
                 if len(model_row.select('td')) > 1:
                     years = model_row.select('td')[1].text.strip().rstrip('-')
-                yield [name, href, years]
+                if 'http' not in href:
+                    yield [name, href, years]
             except:
-                LOGGER.warning('Failed to parse model_row: ' + str(model_row))
+                print 'Failed to parse model_row: ' + str(i) + ' for make: ' + make_name

@@ -16,10 +16,8 @@ class TestScraper(TestCase):
         parse_all(TEST_DIR)
         # TODO some sort of functional test, not just a count of makes
         self.assertEqual(132, Make.objects.count())
-        # TODO do further unit testing on these
-        self.assertEqual(100, Model.objects.count())
-        # TODO do further unit testing on these
-        self.assertEqual(10000, Stat.objects.count())
+        self.assertEqual(4290, Model.objects.count())
+        self.assertEqual(26482, Stat.objects.count())
 
 
 if __name__ == '__main':

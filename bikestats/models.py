@@ -2,7 +2,7 @@ from __future__ import unicode_literals
 
 import os
 from bs4 import BeautifulSoup
-from django.db import models
+from django.db import models, IntegrityError
 
 from bikestats.scraper import Scraper
 
@@ -43,17 +43,24 @@ def parse_all(scraped_root_path):
         scraped_root_path: Path to the scraped directory of the website
     """
     soup = BeautifulSoup(open(os.path.join(scraped_root_path, 'index.html')).read(), "html.parser")
-    for name, make_href in Scraper.parse_makes(soup):
-        make = Make.objects.get_or_create(name=name)
+    for name_make, make_href in Scraper.parse_makes(soup):
+        make, created_make = Make.objects.get_or_create(name=name_make)
         make_soup = BeautifulSoup(open(os.path.join(scraped_root_path, make_href)).read(), "html.parser")
-        models, description_make, pages = Scraper.parse_make(make_soup)
+        models, description_make, pages = Scraper.parse_make(make_soup, name=name_make)
         for page in pages:
-            page_soup = BeautifulSoup(open(os.path.join(scraped_root_path, page)).read(), "html.parser")
-            _models, _d, _p = Scraper.parse_make(page_soup)
-            models.extend(_models)
+            path = os.path.join(scraped_root_path, 'bikes', page)
+            try:
+                page_soup = BeautifulSoup(open(path).read(), "html.parser")
+                _models, _d, _p = Scraper.parse_make(page_soup, name=name_make)
+                models.extend(_models)
+            except:
+                print 'Failed to parse page with path: ' + path
         for name_model, model_href, years in models:
-            model = Model.get_or_create(name=name_model, make=make, years=years)
+            model, created_model = Model.objects.get_or_create(name=name_model, make=make, years=years)
             model_soup = BeautifulSoup(open(os.path.join(scraped_root_path, 'bikes', model_href)).read(), "html.parser")
-            name_model_2, description_model, stats = Scraper.parse_model(model_soup)
-            for name, value in stats:
-                Stat.get_or_create(name=name, value=value, model=model)
+            name_model_2, description_model, stats = Scraper.parse_model(model_soup, make_name=name_make, model_name=name_model)
+            for name_stat, value in stats:
+                try:
+                    Stat.objects.update_or_create(name=name_stat, value=value, model=model)
+                except IntegrityError:
+                    print 'IntegrityError for make/model: ' + name_make + '/' + name_model + " stat: " + name_stat
