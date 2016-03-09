@@ -9,7 +9,7 @@ class MakeAdmin(admin.ModelAdmin):
 
 class ModelAdmin(admin.ModelAdmin):
     list_display = ('id', 'name', 'get_make', 'years', 'description', 'last_modified')
-    search_fields = ('id', 'name', 'get_make', 'years', 'description', 'last_modified')
+    search_fields = ('id', 'name', 'make__name', 'years', 'description', 'last_modified')
 
     def get_make(self, obj):
         return obj.make.name
@@ -19,8 +19,20 @@ class ModelAdmin(admin.ModelAdmin):
 
 
 class StatAdmin(admin.ModelAdmin):
-    list_display = ('id', 'name', 'value')
-    search_fields = ('id', 'name', 'value')
+    list_display = ('id', 'get_model', 'get_make', 'name', 'value')
+    search_fields = ('id', 'model__name', 'model__make__name', 'name', 'value')
+
+    def get_model(self, obj):
+        return obj.model.name
+
+    get_model.short_description = 'Model'
+    get_model.admin_order_field = 'model__name'
+
+    def get_make(self, obj):
+        return obj.model.make.name
+
+    get_make.short_description = 'Make'
+    get_make.admin_order_field = 'model__make__name'
 
 
 admin.site.register(Make, MakeAdmin)
