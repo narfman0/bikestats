@@ -8,8 +8,8 @@ class MakeAdmin(admin.ModelAdmin):
 
 
 class ModelAdmin(admin.ModelAdmin):
-    list_display = ('id', 'name', 'get_make', 'description', 'last_modified')
-    search_fields = ('id', 'name', 'get_make', 'description', 'last_modified')
+    list_display = ('id', 'name', 'get_make', 'years', 'description', 'last_modified')
+    search_fields = ('id', 'name', 'get_make', 'years', 'description', 'last_modified')
 
     def get_make(self, obj):
         return obj.make.name
