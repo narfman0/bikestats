@@ -12,6 +12,9 @@ class Make(models.Model):
     description = models.TextField(default='')
     last_modified = models.DateTimeField(auto_now=True)
 
+    def __unicode__(self):
+        return self.name
+
     class Meta:
         unique_together = ('name',)
 
@@ -23,6 +26,9 @@ class Model(models.Model):
     description = models.TextField(default='')
     last_modified = models.DateTimeField(auto_now=True)
 
+    def __unicode__(self):
+        return self.make.name + ' ' + self.name
+
     class Meta:
         unique_together = ('name', 'make', 'years')
 
@@ -31,6 +37,9 @@ class Stat(models.Model):
     name = models.CharField(max_length=64)
     value = models.CharField(max_length=64)
     model = models.ForeignKey(Model)
+
+    def __unicode__(self):
+        return unicode(self.model) + "'s " + self.name
 
     class Meta:
         unique_together = ('name', 'model')
