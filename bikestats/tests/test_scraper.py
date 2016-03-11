@@ -18,13 +18,13 @@ class TestScraper(TestCase):
     def test_scrape_make(self):
         with open(os.path.join(TEST_DIR, r'http:_www.motorcyclespecs.co.za_bikes_Ducati.htm')) as f:
             soup = BeautifulSoup(f.read(), "html.parser")
-            models, description, pages = Scraper.parse_make(soup)
+            models, description, pages = Scraper.parse_make(soup, name='Ducati')
             self.assertEqual(101, len(models))
 
     def test_scrape_model(self):
         with open(os.path.join(TEST_DIR, r'http:_www.motorcyclespecs.co.za_model_ducati_ducati_monster_1200s%2015.htm')) as f:
             soup = BeautifulSoup(f.read(), "html.parser")
-            name, description, stats = Scraper.parse_model(soup)
+            name, description, stats = Scraper.parse_model(soup, 'Ducati', 'Monster 1200s')
             self.assertEqual('Ducati Monster 1200S', name)
 
 

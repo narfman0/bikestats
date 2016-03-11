@@ -60,7 +60,7 @@ class Scraper(object):
         description = ''
         try:
             soup_element = soup.select('div > table > tr div')
-            description = unicode(soup_element[1]).replace('\r', '').replace('\t', '').strip()
+            description = Scraper.prettify(unicode(soup_element[1]), False)
         except:
             print 'Failed to parse description for make: ' + name
         return (models, description, pages)
@@ -81,13 +81,19 @@ class Scraper(object):
         for i, model_row in enumerate(soup.select('div > table > tr div > table > tr')):
             try:
                 anchor = model_row.select('a')[0]
-                name = anchor.text.replace("\n","").replace("\r","").replace("\t","").strip()
+                name = Scraper.prettify(anchor.text)
                 href = anchor['href']
                 # check if model has date information in another td
-                years = -1
+                years = ''
                 if len(model_row.select('td')) > 1:
                     years = model_row.select('td')[1].text.strip().rstrip('-')
                 if 'http' not in href:
                     yield [name, href, years]
             except:
-                print 'Failed to parse model_row: ' + str(i) + ' for make: ' + make_name
+                print 'Failed to parse model_row: ' + Scraper.prettify(model_row.text) + ' for make: ' + make_name
+
+    @staticmethod
+    def prettify(text, removeNewlines=True):
+        """ Remove obnoxious newlines tabs and strip """
+        text = text.replace("\n", " ") if removeNewlines else text
+        return text.replace("\r", " ").replace("\t", " ").strip()
