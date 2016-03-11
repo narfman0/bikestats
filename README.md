@@ -22,6 +22,12 @@ Add 'bikestats' to your INSTALLED_APPS. To ingest the scraped data, run models.p
     from bikestats.models import parse_all
     parse_all('www.motorcyclespecs.co.za')
 
+TODO
+----
+
+* Fix wet weight to always be in lbs
+* Fix torque to always be ft-lbs
+
 License
 -------
 

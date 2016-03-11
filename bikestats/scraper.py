@@ -84,11 +84,19 @@ class Scraper(object):
                 name = Scraper.prettify(anchor.text)
                 href = anchor['href']
                 # check if model has date information in another td
-                years = ''
+                year_start = year_end = ''
                 if len(model_row.select('td')) > 1:
-                    years = model_row.select('td')[1].text.strip().rstrip('-')
+                    years = model_row.select('td')[1].text.strip()
+                    if years.endswith('-'):
+                        years = years.rstrip('-')
+                    if years.isdigit():
+                        year_start = year_end = int(years)
+                    elif '-' in years:
+                        year_start, year_end = years.split('-')
+                        if len(year_end) == 2:
+                            year_end = '19' + year_end
                 if 'http' not in href:
-                    yield [name, href, years]
+                    yield [name, href, year_start, year_end]
             except:
                 print 'Failed to parse model_row: ' + Scraper.prettify(model_row.text) + ' for make: ' + make_name
 

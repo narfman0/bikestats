@@ -22,15 +22,16 @@ class Make(models.Model):
 class Model(models.Model):
     name = models.CharField(max_length=200)
     make = models.ForeignKey(Make)
-    years = models.CharField(max_length=64)
+    year_start = models.IntegerField()
+    year_end = models.IntegerField()
     description = models.TextField(default='')
     last_modified = models.DateTimeField(auto_now=True)
 
     def __unicode__(self):
-        return self.make.name + ' ' + self.name
+        return self.make.name + ' ' + self.name + ' ' + self.year-start + '-'
 
     class Meta:
-        unique_together = ('name', 'make', 'years')
+        unique_together = ('name', 'make', 'year_start', 'year_end')
 
 
 class Stat(models.Model):
@@ -64,8 +65,8 @@ def parse_all(scraped_root_path):
                 models.extend(_models)
             except:
                 print 'Failed to parse page with path: ' + path
-        for name_model, model_href, years in models:
-            model, created_model = Model.objects.get_or_create(name=name_model, make=make, years=years)
+        for name_model, model_href, year_start, year_end in models:
+            model, created_model = Model.objects.get_or_create(name=name_model, make=make, year_start=year_start, year_end=year_end)
             model_soup = BeautifulSoup(open(os.path.join(scraped_root_path, 'bikes', model_href)).read(), "html.parser")
             name_model_2, description_model, stats = Scraper.parse_model(model_soup, make_name=name_make, model_name=name_model)
             for name_stat, value in stats:
