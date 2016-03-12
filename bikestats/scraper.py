@@ -106,7 +106,7 @@ class Scraper(object):
                     elif '-' in years:
                         year_start, year_end = years.split('-')
                         if len(year_end) == 2:
-                            year_end = '19' + year_end
+                            year_end = ('20' if 1900 + int(year_end) < int(year_start) else '19') + year_end
                 if 'http' not in href:
                     yield [name, href, year_start, year_end]
             except:
