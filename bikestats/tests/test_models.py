@@ -16,7 +16,7 @@ class TestScraper(TestCase):
         parse_all(TEST_DIR)
         # TODO some sort of functional test, not just a count of makes
         self.assertEqual(132, Make.objects.count())
-        self.assertEqual(4290, Model.objects.count())
+        self.assertEqual(4287, Model.objects.count())
         self.assertEqual(26482, Stat.objects.count())
 
 

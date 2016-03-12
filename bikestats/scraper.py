@@ -5,6 +5,10 @@ class Scraper(object):
     """ We scrape the website and store the information in the models. We save the urls
     and the previously modified time, so that if anything is updated, we may update our
     resources. We also don't want to peg the site too much, by being good webizens. """
+    wet_weight_name_regex = re.compile(r"Wet Weight", re.I)
+    dry_weight_name_regex = re.compile(r"(Curb|Dry|Unladen) Weight", re.I)
+    # weights saves in either kgs or lbs group
+    weight_value_regex = re.compile(r"(?:(?P<kgs>[0-9]+)\s*Kg)|(?:(?P<lbs>[0-9]+)\s*lbs?)", re.I)
 
     @staticmethod
     def parse_model(soup, make_name='unknown make', model_name='unknown model'):
@@ -17,8 +21,16 @@ class Scraper(object):
         for i, table_row in enumerate(soup.select('table[cellspacing=1] tr')):
             try:
                 tds = table_row.select('td')
-                model_name = tds[0].text.strip()
-                value = tds[1].text.strip()
+                model_name = tds[0].text.strip() # e.g. Dry Weight or Capacity
+                value = tds[1].text.strip() # e.g. 400 lbs or 410 lbs, 200 kg
+                # scrape and correct for weight. lbs vs kgs, dry vs wet
+                md = re.match(Scraper.dry_weight_name_regex, model_name)
+                if re.match(Scraper.wet_weight_name_regex, model_name) or md:
+                    model_name = 'weight'
+                    match_weight_value = re.match(Scraper.weight_value_regex, value)
+                    value = match_weight_value.group('lbs') or str(float(match_weight_value.group('kgs')) * 2.2)
+                    if md: # add 10% for dry weight. who knows weights so lame.
+                        value = str(float(value) * 1.1)
                 stats.append([model_name, value])
                 table_row.extract()
             except:
